@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Kasir — Philokophi Street</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0A4E5C">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <span class="brand-mark" title="Philokophi Street">
+        <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 10h50"/>
+          <path d="M13 10 23 29"/>
+          <path d="M51 10 41 29"/>
+          <path d="M15 29v11M49 29v11"/>
+          <path d="M15 29h9M40 29h9"/>
+          <path d="M15 40h9M40 40h9"/>
+          <circle cx="32" cy="34.5" r="4"/>
+          <path d="M18 40 8 57"/>
+          <path d="M46 40 56 57"/>
+          <rect x="26.5" y="45" width="11" height="12"/>
+        </svg>
+      </span>
+      <nav class="nav" aria-label="Menu utama">
+        <button class="nav-item is-active" data-tab="kasir" type="button" aria-current="page">
+          <span data-icon="bag"></span><span class="nav-label">Kasir</span>
+        </button>
+        <button class="nav-item" data-tab="riwayat" type="button">
+          <span data-icon="clock"></span><span class="nav-label">Riwayat</span>
+        </button>
+        <button class="nav-item" data-tab="produk" type="button">
+          <span data-icon="box"></span><span class="nav-label">Produk</span>
+        </button>
+        <button class="nav-item" data-tab="laporan" type="button">
+          <span data-icon="chart"></span><span class="nav-label">Laporan</span>
+        </button>
+      </nav>
+      <div class="shift" role="group" aria-label="Pilih shift">
+        <button type="button" data-shift="siang">Siang</button>
+        <button type="button" data-shift="malam">Malam</button>
+      </div>
+    </aside>
+
+    <main class="stage">
+      <section class="view" id="view-kasir">
+        <header class="toolbar">
+          <label class="search">
+            <span data-icon="search"></span>
+            <input id="cari" type="search" placeholder="Cari produk" autocomplete="off" spellcheck="false" aria-label="Cari produk">
+            <kbd>/</kbd>
+          </label>
+          <div class="chips" id="chips" role="group" aria-label="Filter kategori"></div>
+          <button class="btn btn-cart" id="bukaKeranjang" type="button">
+            <span data-icon="bag"></span> Keranjang <span class="count" id="countKecil">0</span>
+          </button>
+        </header>
+        <div class="grid" id="grid"></div>
+        <p class="empty-state" id="gridEmpty" hidden>Tidak ada produk yang cocok dengan pencarian ini.</p>
+      </section>
+
+      <section class="view" id="view-riwayat" hidden>
+        <header class="view-head">
+          <div>
+            <h1>Riwayat transaksi</h1>
+            <p class="sub" id="riwayatSub">Belum ada transaksi.</p>
+          </div>
+          <div class="filters">
+            <label class="search date">
+              <span data-icon="calendar"></span>
+              <input type="date" id="filterTanggal" aria-label="Filter tanggal">
+            </label>
+            <button class="btn" id="resetTanggal" type="button">Semua tanggal</button>
+          </div>
+        </header>
+        <div class="table-wrap" id="wrapRiwayat">
+          <table class="table">
+            <thead>
+              <tr><th>Waktu</th><th>No. struk</th><th>Atas nama</th><th>Metode</th><th class="num">Item</th><th class="num">Total</th></tr>
+            </thead>
+            <tbody id="tbodyRiwayat"></tbody>
+          </table>
+        </div>
+        <p class="empty-state" id="riwayatEmpty" hidden>Tidak ada transaksi pada tanggal yang dipilih.</p>
+      </section>
+
+      <section class="view" id="view-produk" hidden>
+        <header class="view-head">
+          <div>
+            <h1>Produk</h1>
+            <p class="sub" id="produkSub"></p>
+          </div>
+          <div class="filters">
+            <label class="search">
+              <span data-icon="search"></span>
+              <input id="cariProduk" type="search" placeholder="Cari produk" autocomplete="off" aria-label="Cari produk">
+            </label>
+            <button class="btn primary" id="tambahProduk" type="button"><span data-icon="plus"></span> Tambah produk</button>
+          </div>
+        </header>
+        <div class="table-wrap">
+          <table class="table">
+            <thead>
+              <tr><th>Produk</th><th class="num">Harga beli</th><th class="num">Harga jual</th><th class="num">Stok</th><th class="num">Aksi</th></tr>
+            </thead>
+            <tbody id="tbodyProduk"></tbody>
+          </table>
+        </div>
+        <p class="empty-state" id="produkEmpty" hidden>Belum ada produk. Tambahkan produk pertama lewat tombol di atas.</p>
+      </section>
+
+      <section class="view" id="view-laporan" hidden>
+        <header class="view-head">
+          <div>
+            <h1>Laporan</h1>
+            <p class="sub" id="lapSub"></p>
+          </div>
+        </header>
+        <section class="band" aria-label="Ringkasan penjualan hari ini">
+          <div class="band-main">
+            <p class="lbl">Omzet hari ini</p>
+            <p class="big" id="omzetHariIni">Rp 0</p>
+          </div>
+          <div class="band-stat"><p class="lbl">Transaksi</p><p class="val" id="jmlTransaksi">0</p></div>
+          <div class="band-stat"><p class="lbl">Rata-rata / transaksi</p><p class="val" id="rataTransaksi">Rp 0</p></div>
+          <div class="band-stat"><p class="lbl">Item terjual</p><p class="val" id="jmlItem">0</p></div>
+        </section>
+        <div class="report-grid">
+          <div class="panel">
+            <div class="panel-head"><h2>Penjualan per jam</h2><span class="tag" id="tagHari">Hari ini</span></div>
+            <div class="chart-box">
+              <canvas id="grafik" height="240" aria-label="Grafik penjualan per jam"></canvas>
+              <p class="empty-state" id="grafikEmpty" hidden>Belum ada penjualan hari ini.</p>
+            </div>
+          </div>
+          <div class="panel">
+            <div class="panel-head"><h2>Produk terlaris</h2><span class="tag">Sepanjang waktu</span></div>
+            <ol class="top" id="topProduk"></ol>
+            <p class="empty-state" id="topEmpty" hidden>Belum ada produk yang terjual.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <aside class="cart" id="keranjang" aria-label="Keranjang belanja">
+      <header class="cart-head">
+        <div>
+          <h2>Keranjang</h2>
+          <p class="sub" id="cartSub">0 item</p>
+        </div>
+        <div class="cart-head-actions">
+          <button class="link-btn" id="kosongkan" type="button">Kosongkan</button>
+          <button class="icon-btn cart-close" id="tutupKeranjang" type="button" aria-label="Tutup keranjang"><span data-icon="close"></span></button>
+        </div>
+      </header>
+
+      <div class="cart-list" id="cartList"></div>
+
+      <div class="cart-foot" id="cartFoot">
+        <label class="field">
+          <input id="atasNama" type="text" maxlength="40" autocomplete="off" placeholder="Atas nama" aria-label="Atas nama">
+        </label>
+        <div class="methods" role="group" aria-label="Metode pembayaran">
+          <button class="method is-active" data-metode="tunai" type="button">Tunai</button>
+          <button class="method" data-metode="qris" type="button">QRIS</button>
+          <button class="method" data-metode="debit" type="button">Debit</button>
+        </div>
+
+        <div class="cash" id="cashWrap">
+          <label class="field">
+            <input id="tunai" type="text" inputmode="numeric" autocomplete="off" placeholder="Uang tunai" aria-label="Uang tunai">
+          </label>
+          <div class="quick">
+            <button type="button" data-uang="pas">Uang pas</button>
+            <button type="button" data-uang="20000">20.000</button>
+            <button type="button" data-uang="50000">50.000</button>
+            <button type="button" data-uang="100000">100.000</button>
+          </div>
+        </div>
+
+        <dl class="sums">
+          <div id="rowSubtotal" hidden><dt>Subtotal</dt><dd id="sumSubtotal">Rp 0</dd></div>
+          <div id="rowDiskon" hidden><dt>Diskon</dt><dd class="dd-diskon"><span id="sumDiskon" hidden>Rp 0</span><span class="pct"><input id="diskon" type="number" min="0" max="100" step="1" value="0" aria-label="Diskon persen"><span>%</span></span></dd></div>
+          <div class="total"><dt>Total</dt><dd id="sumTotal">Rp 0</dd></div>
+          <div id="rowBayar" hidden><dt>Bayar</dt><dd id="sumBayar">Rp 0</dd></div>
+          <div id="rowKembali" hidden><dt>Kembalian</dt><dd id="sumKembali" class="chip-num">Rp 0</dd></div>
+        </dl>
+
+        <button class="btn pay" id="bayar" type="button" disabled>Bayar</button>
+        <p class="hint" id="bayarHint">Pilih produk untuk memulai transaksi</p>
+      </div>
+    </aside>
+  </div>
+
+  <div class="backdrop" id="backdrop" hidden></div>
+
+  <div class="modal" id="modalStruk" role="dialog" aria-modal="true" aria-labelledby="judulStruk" hidden>
+    <div class="sheet">
+      <header class="sheet-head">
+        <div><p class="eyebrow">Pembayaran berhasil</p><h2 id="judulStruk">Struk pembelian</h2></div>
+        <button class="icon-btn" type="button" data-tutup aria-label="Tutup"><span data-icon="close"></span></button>
+      </header>
+      <div class="sheet-body" id="strukBody"></div>
+      <footer class="sheet-foot">
+        <button class="btn" type="button" data-tutup>Tutup</button>
+        <button class="btn primary" type="button" id="cetakStruk"><span data-icon="print"></span> Cetak</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="modal" id="modalDetail" role="dialog" aria-modal="true" aria-labelledby="judulDetail" hidden>
+    <div class="sheet">
+      <header class="sheet-head">
+        <div><p class="eyebrow">Detail transaksi</p><h2 id="judulDetail">Struk</h2></div>
+        <button class="icon-btn" type="button" data-tutup aria-label="Tutup"><span data-icon="close"></span></button>
+      </header>
+      <div class="sheet-body" id="detailBody"></div>
+      <footer class="sheet-foot">
+        <button class="text-btn danger" type="button" id="hapusTrx">Hapus</button>
+        <button class="btn" type="button" data-tutup>Tutup</button>
+        <button class="btn primary" type="button" id="cetakUlang"><span data-icon="print"></span> Cetak ulang</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="modal" id="modalProduk" role="dialog" aria-modal="true" aria-labelledby="fJudul" hidden>
+    <form class="sheet" id="formProduk" novalidate>
+      <header class="sheet-head">
+        <div><p class="eyebrow">Data produk</p><h2 id="fJudul">Tambah produk</h2></div>
+        <button class="icon-btn" type="button" data-tutup aria-label="Tutup"><span data-icon="close"></span></button>
+      </header>
+      <div class="sheet-body">
+        <label class="field"><span>Nama produk</span>
+          <input id="fNama" type="text" maxlength="60" autocomplete="off" placeholder="Kopi Susu Gula Aren" data-autofocus>
+          <small class="err" id="errNama" hidden></small>
+        </label>
+        <div class="row2">
+          <label class="field"><span>Kategori</span>
+            <input id="fKategori" type="text" list="daftarKategori" maxlength="30" placeholder="Kopi" autocomplete="off">
+            <datalist id="daftarKategori"></datalist>
+            <small class="err" id="errKategori" hidden></small>
+          </label>
+          <label class="field"><span>Stok</span>
+            <input id="fStok" type="number" min="0" step="1" inputmode="numeric" placeholder="0">
+            <small class="err" id="errStok" hidden></small>
+          </label>
+        </div>
+        <div class="row2">
+          <label class="field"><span>Harga beli</span>
+            <input id="fBeli" type="number" min="0" step="100" inputmode="numeric" placeholder="0">
+            <small class="err" id="errBeli" hidden></small>
+          </label>
+          <label class="field"><span>Harga jual</span>
+            <input id="fJual" type="number" min="0" step="500" inputmode="numeric" placeholder="0">
+            <small class="err" id="errJual" hidden></small>
+          </label>
+        </div>
+        <p class="inline-hint" id="marginHint" hidden></p>
+      </div>
+      <footer class="sheet-foot">
+        <button class="btn" type="button" data-tutup>Batal</button>
+        <button class="btn primary" type="submit">Simpan produk</button>
+      </footer>
+    </form>
+  </div>
+
+  <div class="modal" id="modalKonfirmasi" role="dialog" aria-modal="true" aria-labelledby="konfirmasiJudul" hidden>
+    <div class="sheet narrow">
+      <header class="sheet-head">
+        <div><p class="eyebrow">Konfirmasi</p><h2 id="konfirmasiJudul">Hapus produk</h2></div>
+        <button class="icon-btn" type="button" data-tutup aria-label="Tutup"><span data-icon="close"></span></button>
+      </header>
+      <div class="sheet-body"><p id="konfirmasiPesan"></p></div>
+      <footer class="sheet-foot">
+        <button class="btn" type="button" id="konfirmasiBatal">Batal</button>
+        <button class="btn accent" type="button" id="konfirmasiOke">Hapus</button>
+      </footer>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <div id="printArea" aria-hidden="true"></div>
+
+  <script src="js/data.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/kasir.js"></script>
+  <script src="js/produk.js"></script>
+  <script src="js/riwayat.js"></script>
+  <script src="js/laporan.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
