@@ -12,7 +12,10 @@ function initElProduk() {
 
 function daftarFilter() {
   const q = kataCariProduk.trim().toLowerCase();
-  return state.produk.filter(p => !q || p.nama.toLowerCase().includes(q) || p.kategori.toLowerCase().includes(q));
+  return state.produk.filter(p => {
+    if (typeof cocokPencarian === 'function') return cocokPencarian(p, q);
+    return !q || p.nama.toLowerCase().includes(q) || p.kategori.toLowerCase().includes(q);
+  });
 }
 
 function renderProduk() {
@@ -165,6 +168,24 @@ function initProduk() {
   isiDatalist();
 
   elProduk.cariProduk.addEventListener('input', () => { kataCariProduk = elProduk.cariProduk.value; renderProduk(); });
+  const btnReset = document.getElementById('resetProduk');
+  if (btnReset) {
+    btnReset.addEventListener('click', async () => {
+      const setuju = await konfirmasi(
+        'Reset menu default',
+        'Kembalikan daftar produk ke menu default Philokophi Street? Perubahan kustom akan ditimpa.',
+        'Reset'
+      );
+      if (!setuju) return;
+      state.produk = benih();
+      state.keranjang = [];
+      simpanProduk();
+      simpanKeranjang();
+      window.dispatchEvent(new Event('produk:ubah'));
+      renderProduk();
+      toast('Menu berhasil direset ke default');
+    });
+  }
   elProduk.tambahProduk.addEventListener('click', () => bukaForm(null));
   elProduk.formProduk.addEventListener('submit', simpan);
   elProduk.fBeli.addEventListener('input', hitungMargin);

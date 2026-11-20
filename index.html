@@ -5,8 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Kasir — Philokophi Street</title>
   <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0A4E5C">
+  <meta name="description" content="Kasir Philokophi Street — aplikasi kasir online untuk catat transaksi, kelola produk, dan lihat laporan omzet. Buka langsung di browser, bisa dipakai offline.">
+  <link rel="canonical" href="https://sanawirukoyah-byte.github.io/kasir-philokophi/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://sanawirukoyah-byte.github.io/kasir-philokophi/">
+  <meta property="og:title" content="Kasir — Philokophi Street">
+  <meta property="og:description" content="Aplikasi kasir online: catat transaksi, kelola produk, dan lihat laporan omzet. Bisa dipakai offline.">
+  <meta property="og:image" content="https://sanawirukoyah-byte.github.io/kasir-philokophi/icon-512.png">
+  <meta property="og:image:width" content="512">
+  <meta property="og:image:height" content="512">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Kasir — Philokophi Street">
+  <meta name="twitter:description" content="Aplikasi kasir online: catat transaksi, kelola produk, dan lihat laporan omzet.">
+  <meta name="twitter:image" content="https://sanawirukoyah-byte.github.io/kasir-philokophi/icon-512.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -102,6 +114,7 @@
               <span data-icon="search"></span>
               <input id="cariProduk" type="search" placeholder="Cari produk" autocomplete="off" aria-label="Cari produk">
             </label>
+            <button class="btn" id="resetProduk" type="button">Reset menu default</button>
             <button class="btn primary" id="tambahProduk" type="button"><span data-icon="plus"></span> Tambah produk</button>
           </div>
         </header>
@@ -238,12 +251,12 @@
       </header>
       <div class="sheet-body">
         <label class="field"><span>Nama produk</span>
-          <input id="fNama" type="text" maxlength="60" autocomplete="off" placeholder="Kopi Susu Gula Aren" data-autofocus>
+          <input id="fNama" type="text" maxlength="60" autocomplete="off" placeholder="Philo Aren" data-autofocus>
           <small class="err" id="errNama" hidden></small>
         </label>
         <div class="row2">
           <label class="field"><span>Kategori</span>
-            <input id="fKategori" type="text" list="daftarKategori" maxlength="30" placeholder="Kopi" autocomplete="off">
+            <input id="fKategori" type="text" list="daftarKategori" maxlength="30" placeholder="Philokophi Susu" autocomplete="off">
             <datalist id="daftarKategori"></datalist>
             <small class="err" id="errKategori" hidden></small>
           </label>

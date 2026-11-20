@@ -42,7 +42,8 @@ function escapeHtml(s) {
 }
 
 function inisial(nama) {
-  const bagian = String(nama).trim().split(/\s+/).filter(Boolean);
+  const bersih = String(nama).replace(/[^a-zA-Z0-9\s]/g, ' ').trim();
+  const bagian = bersih.split(/\s+/).filter(Boolean);
   if (!bagian.length) return '?';
   const a = bagian[0][0] || '';
   const b = bagian[1] ? bagian[1][0] : bagian[0][1] || '';

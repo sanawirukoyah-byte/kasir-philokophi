@@ -42,17 +42,31 @@ function totalQty(items) {
 }
 
 function renderChips() {
-  elKasir.chips.innerHTML = daftarKategori()
+  const cats = daftarKategori();
+  if (!cats.includes(kategori)) kategori = 'Semua';
+  elKasir.chips.innerHTML = cats
     .map(k => `<button class="chip${k === kategori ? ' is-active' : ''}" type="button" data-kategori="${escapeHtml(k)}">${escapeHtml(k)}</button>`)
     .join('');
+}
+
+function cocokPencarian(p, q) {
+  if (!q) return true;
+  const n = p.nama.toLowerCase();
+  const k = p.kategori.toLowerCase();
+  if (n.includes(q) || k.includes(q)) return true;
+  if ((q === 'v60' || q.includes('v60')) && (k.includes('filter') || n.includes('filter'))) return true;
+  if ((q === 'coklat' || q === 'cokelat' || q === 'chocolate') && n.includes('choklatte')) return true;
+  if ((q === 'klasik' || q === 'classic') && n.includes('clasik')) return true;
+  if ((q === 'milkyway' || q === 'milky') && n.includes('milkway')) return true;
+  if (q.includes('butterscotch') && n.includes('butterscoth')) return true;
+  return false;
 }
 
 function renderGrid() {
   const q = kataCari.trim().toLowerCase();
   const list = state.produk.filter(p => {
     const cocokKategori = kategori === 'Semua' || p.kategori === kategori;
-    const cocokCari = !q || p.nama.toLowerCase().includes(q) || p.kategori.toLowerCase().includes(q);
-    return cocokKategori && cocokCari;
+    return cocokKategori && cocokPencarian(p, q);
   });
   elKasir.grid.innerHTML = list.map(p => {
     const habis = p.stok <= 0;
@@ -208,13 +222,24 @@ function kosongkan() {
 
 function nomorStruk() {
   const key = tanggalKey(Date.now());
-  const n = state.transaksi.filter(t => tanggalKey(t.waktu) === key).length + 1;
-  return 'TK-' + key.replace(/-/g, '') + '-' + String(n).padStart(4, '0');
+  const prefix = 'TK-' + key.replace(/-/g, '') + '-';
+  // Ambil nomor terbesar hari ini (bukan jumlahnya) supaya tidak bentrok
+  // saat transaksi lama dihapus
+  let maks = 0;
+  state.transaksi.forEach(t => {
+    if (typeof t.no === 'string' && t.no.startsWith(prefix)) {
+      const n = Number(t.no.slice(prefix.length));
+      if (Number.isInteger(n) && n > maks) maks = n;
+    }
+  });
+  return prefix + String(maks + 1).padStart(4, '0');
 }
 
 function bayarSekarang() {
   const items = itemsAktif();
   if (!items.length) { toast('Keranjang masih kosong'); return; }
+
+  sinkronShift(); // pastikan shift mengikuti jam saat transaksi dibuat
 
   const subtotal = items.reduce((a, i) => a + i.p.jual * i.qty, 0);
   const persen = state.diskon;
