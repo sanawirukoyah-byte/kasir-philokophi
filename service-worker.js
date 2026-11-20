@@ -1,5 +1,5 @@
 /* Kasir — Philokophi Street: service worker */
-const CACHE = 'kasir-v1';
+const CACHE = 'kasir-v6';
 
 const CORE = [
   './',
