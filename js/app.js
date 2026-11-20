@@ -33,12 +33,44 @@ document.querySelectorAll('.nav-item').forEach(b => {
   b.addEventListener('click', () => setTab(b.dataset.tab));
 });
 
+renderShift();
+setInterval(sinkronShift, 30000);
+window.addEventListener('focus', sinkronShift);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) sinkronShift(); });
+
+// Pilihan shift manual: berlaku selama sesi ini, sinkron otomatis tidak menimpanya
+document.querySelectorAll('[data-shift]').forEach(b => {
+  b.addEventListener('click', () => {
+    const pilihan = b.dataset.shift;
+    if (state.shift === pilihan && state.shiftManual) return;
+    state.shift = pilihan;
+    state.shiftManual = true;
+    renderShift();
+    toast(`Shift dipilih manual: ${labelShift(pilihan)}`);
+  });
+});
+
+// Di ≥1024px keranjang menempel sebagai kolom dan tombol close disembunyikan CSS,
+// jadi paksa tutup drawer supaya backdrop tidak menutupi layar setelah resize
+const mqDesktop = window.matchMedia('(min-width: 1024px)');
+function tutupDrawerDiDesktop() {
+  if (mqDesktop.matches && drawerTerbuka()) setDrawer(false);
+}
+mqDesktop.addEventListener('change', tutupDrawerDiDesktop);
+tutupDrawerDiDesktop();
+
 document.getElementById('backdrop').addEventListener('click', () => {
   if (modalAktif()) tutupAtas();
   else if (drawerTerbuka()) setDrawer(false);
 });
 
 window.addEventListener('produk:ubah', () => renderKasir());
+
+// Dua tab pada satu perangkat: terima perubahan tab lain, render ulang tab aktif
+window.addEventListener('storage', e => {
+  if (e.storageArea && e.storageArea !== localStorage) return;
+  if (terimaStorage(e.key)) setTab(state.tab);
+});
 
 document.addEventListener('modal:tutup', e => {
   if (e.detail.id === 'modalStruk' && state.tab === 'kasir') fokusCari();
@@ -63,7 +95,9 @@ document.addEventListener('keydown', e => {
   }
 
   if (e.key === 'Enter') {
-    if (tag === 'BUTTON' || tag === 'A' || tag === 'FORM') return;
+    // Enter hanya memicu bayar saat fokus bukan di kolom isian/form apa pun
+    if (tag === 'BUTTON' || tag === 'A' || tag === 'FORM' ||
+        tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
     if (state.tab === 'kasir') {
       e.preventDefault();
       bayarSekarang();
@@ -73,7 +107,11 @@ document.addEventListener('keydown', e => {
 
 setTab('kasir');
 
-if ('serviceWorker' in navigator) {
+if (location.protocol !== 'file:' && 'serviceWorker' in navigator) {
+  const mf = document.createElement('link');
+  mf.rel = 'manifest';
+  mf.href = 'manifest.json';
+  document.head.appendChild(mf);
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('./service-worker.js').catch(() => {});
   });
