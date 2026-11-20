@@ -113,6 +113,8 @@ if (location.protocol !== 'file:' && 'serviceWorker' in navigator) {
   mf.href = 'manifest.json';
   document.head.appendChild(mf);
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./service-worker.js').catch(() => {});
+    navigator.serviceWorker.register('./service-worker.js').then(reg => {
+      reg.update().catch(() => {});
+    }).catch(() => {});
   });
 }

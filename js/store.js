@@ -1,6 +1,25 @@
 const K_PRODUK = 'kasir.produk.v3';
 const K_TRX = 'kasir.transaksi.v2';
 const K_KERANJANG = 'kasir.keranjang.v3';
+const K_SEED_VER = 'kasir.seed.v3_tier';
+
+function perluMigrasiMenu(list) {
+  if (!Array.isArray(list) || !list.length) return true;
+  // Deteksi jika masih ada menu bawaan versi lama
+  const menuLama = [
+    'Philter coffee', 'Reguler', 'Seasonal', 'Eksotic', 'Phikong Black',
+    'Bland 50/50', 'Arabika full', 'Phi Latte bland', 'Phi Split Seasonal',
+    'Phi Pandanaren', 'Phi Buterscoth', 'Phi Waylatte', 'Phi Strawbest',
+    'Mokstrophis', 'Moksphis', 'Mounblank', 'Joshblank', 'Matcha', 'Cokelat'
+  ];
+  if (list.some(p => p && menuLama.includes(p.nama))) return true;
+
+  // Pastikan menu baru Filter Coffee Tier 1 sudah ada
+  const adaTier1 = list.some(p => p && p.nama === 'Filter Coffee Tier 1');
+  if (!adaTier1) return true;
+
+  return false;
+}
 
 function loadState(kunci, cadangan) {
   try {
@@ -162,8 +181,16 @@ function muatKeranjang() {
     .filter(Boolean);
 }
 
+let rawProduk = loadState(K_PRODUK, null);
+if (perluMigrasiMenu(rawProduk)) {
+  rawProduk = benih();
+  saveState(K_PRODUK, rawProduk);
+  saveState(K_SEED_VER, 'v3_tier');
+  saveState(K_KERANJANG, []);
+}
+
 const state = {
-  produk: bersihProduk(loadState(K_PRODUK, null), true),
+  produk: bersihProduk(rawProduk, true),
   transaksi: [],
   keranjang: [],
   diskon: 0,
@@ -183,10 +210,16 @@ let dasarTrx = salin(state.transaksi);
 let dasarKeranjang = salin(state.keranjang);
 
 function simpanProduk() {
-  const diDisk = bersihProduk(loadState(K_PRODUK, null), true);
-  const gabung = mergeTigaArah(state.produk, dasarProduk, diDisk);
+  let diDisk = loadState(K_PRODUK, null);
+  if (perluMigrasiMenu(diDisk)) {
+    diDisk = benih();
+  }
+  const gabung = mergeTigaArah(state.produk, dasarProduk, bersihProduk(diDisk, true));
   state.produk = gabung;
-  if (saveState(K_PRODUK, gabung)) dasarProduk = salin(gabung);
+  if (saveState(K_PRODUK, gabung)) {
+    dasarProduk = salin(gabung);
+    saveState(K_SEED_VER, 'v3_tier');
+  }
 }
 
 if (!loadState(K_PRODUK, null)) {
@@ -213,7 +246,12 @@ function simpanKeranjang() {
 function terimaStorage(kunci) {
   if (kunci !== null && kunci !== K_PRODUK && kunci !== K_TRX && kunci !== K_KERANJANG) return false;
   if (kunci === null || kunci === K_PRODUK) {
-    state.produk = bersihProduk(loadState(K_PRODUK, null), true);
+    let diDisk = loadState(K_PRODUK, null);
+    if (perluMigrasiMenu(diDisk)) {
+      diDisk = benih();
+      saveState(K_PRODUK, diDisk);
+    }
+    state.produk = bersihProduk(diDisk, true);
     dasarProduk = salin(state.produk);
   }
   if (kunci === null || kunci === K_TRX) {
